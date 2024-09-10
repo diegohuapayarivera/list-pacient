@@ -2,43 +2,65 @@ import { useForm } from "react-hook-form";
 import Error from "./Error";
 import type { DraftPatient } from "../types";
 import { usePatientStore } from "../store";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 export default function PatientForm() {
-  const { addPatient, activeId } = usePatientStore();
+  const { addPatient, activeId, patients, updatePatient } = usePatientStore();
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
     reset,
   } = useForm<DraftPatient>();
 
   const registerPatient = (data: DraftPatient) => {
-    addPatient(data);
+    if (activeId) {
+      updatePatient(data);
+      toast.success('Paciente actualizado correctamente');
+    } else { 
+      addPatient(data);
+      toast.success('Paciente registrado correctamente');
+    }
+
     reset();
   };
 
+  useEffect(() => {
+    if (activeId) {
+      const activePatient = patients.filter(
+        (patient) => patient.id === activeId
+      )[0];
+      setValue("name", activePatient.name);
+      setValue("caretaker", activePatient.caretaker);
+      setValue("email", activePatient.email);
+      setValue("date", activePatient.date);
+      setValue("symtoms", activePatient.symtoms);
+    }
+  }, [activeId]);
   return (
-    <div className="md:w-1/2 lg:w-2/5 mx-5">
-      <h2 className="font-black text-3xl text-center">Seguimiento Pacientes</h2>
+    <div className="mx-5 md:w-1/2 lg:w-2/5">
+      <h2 className="text-3xl font-black text-center">Seguimiento Pacientes</h2>
 
-      <p className="text-lg mt-5 text-center mb-10">
+      <p className="mt-5 mb-10 text-lg text-center">
         Añade Pacientes y {""}
-        <span className="text-indigo-600 font-bold">Administralos</span>
+        <span className="font-bold text-indigo-600">Administralos</span>
       </p>
 
       <form
-        className="bg-white shadow-md rounded-lg py-10 px-5 mb-10"
+        className="px-5 py-10 mb-10 bg-white rounded-lg shadow-md"
         noValidate
         onSubmit={handleSubmit(registerPatient)}
       >
         <div className="mb-5">
-          <label htmlFor="name" className="text-sm uppercase font-bold">
+          <label htmlFor="name" className="text-sm font-bold uppercase">
             Paciente
           </label>
           <input
             id="name"
-            className="w-full p-3  border border-gray-100"
+            className="w-full p-3 border border-gray-100"
             type="text"
             placeholder="Nombre del Paciente"
             {...register("name", {
@@ -49,12 +71,12 @@ export default function PatientForm() {
         </div>
 
         <div className="mb-5">
-          <label htmlFor="caretaker" className="text-sm uppercase font-bold">
+          <label htmlFor="caretaker" className="text-sm font-bold uppercase">
             Propietario
           </label>
           <input
             id="caretaker"
-            className="w-full p-3  border border-gray-100"
+            className="w-full p-3 border border-gray-100"
             type="text"
             placeholder="Nombre del Propietario"
             {...register("caretaker", {
@@ -65,12 +87,12 @@ export default function PatientForm() {
         </div>
 
         <div className="mb-5">
-          <label htmlFor="email" className="text-sm uppercase font-bold">
+          <label htmlFor="email" className="text-sm font-bold uppercase">
             Email
           </label>
           <input
             id="email"
-            className="w-full p-3  border border-gray-100"
+            className="w-full p-3 border border-gray-100"
             type="email"
             placeholder="Email de Registro"
             {...register("email", {
@@ -85,12 +107,12 @@ export default function PatientForm() {
         </div>
 
         <div className="mb-5">
-          <label htmlFor="date" className="text-sm uppercase font-bold">
+          <label htmlFor="date" className="text-sm font-bold uppercase">
             Fecha Alta
           </label>
           <input
             id="date"
-            className="w-full p-3  border border-gray-100"
+            className="w-full p-3 border border-gray-100"
             type="date"
             {...register("date", {
               required: "La fecha de alta es obligatorio",
@@ -100,12 +122,12 @@ export default function PatientForm() {
         </div>
 
         <div className="mb-5">
-          <label htmlFor="symptoms" className="text-sm uppercase font-bold">
+          <label htmlFor="symptoms" className="text-sm font-bold uppercase">
             Síntomas
           </label>
           <textarea
             id="symptoms"
-            className="w-full p-3  border border-gray-100"
+            className="w-full p-3 border border-gray-100"
             placeholder="Síntomas del paciente"
             {...register("symtoms", {
               required: "Los sintomas son obligatorio",
@@ -118,7 +140,7 @@ export default function PatientForm() {
 
         <input
           type="submit"
-          className="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors"
+          className="w-full p-3 font-bold text-white uppercase transition-colors bg-indigo-600 cursor-pointer hover:bg-indigo-700"
           value="Guardar Paciente"
         />
       </form>
